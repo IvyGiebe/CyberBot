@@ -16,7 +16,7 @@ import javax.security.auth.login.LoginException;
 
 //invite link https://discord.com/api/oauth2/authorize?client_id=1159518907602833450&permissions=8&scope=bot%20applications.commands
 public class CyberBot {
-
+//hhhhhhg
     private final ShardManager shardManager;
     private final Dotenv config;
 
