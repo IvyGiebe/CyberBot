@@ -11,9 +11,11 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 
 public class PlayerManager {
 
@@ -37,8 +39,8 @@ public class PlayerManager {
         });
     }
 
-    public void loadAndPlay(TextChannel textChannel, String trackURL, SlashCommandInteractionEvent event){
-        final MusicManager musicManager = this.getMusicManager(textChannel.getGuild());
+    public void loadAndPlay(String trackURL, SlashCommandInteractionEvent event){
+        final MusicManager musicManager = this.getMusicManager(event.getGuild());
 
         this.audioPlayerManager.loadItemOrdered(musicManager, trackURL, new AudioLoadResultHandler() {
             @Override
@@ -71,24 +73,72 @@ public class PlayerManager {
 
     }
 
-    public void pause(TextChannel textChannel){
-        final MusicManager musicManager = this.getMusicManager(textChannel.getGuild());
+    public void pause(SlashCommandInteractionEvent event){
+        final MusicManager musicManager = this.getMusicManager(event.getGuild());
 
         musicManager.trackScheduler.pause(true);
         //textChannel.sendMessage("Music is paused. Use /unpause to resume playing.").queue();
     }
 
-    public void unpause(TextChannel textChannel){
-        final MusicManager musicManager = this.getMusicManager(textChannel.getGuild());
+    public void unpause(SlashCommandInteractionEvent event){
+        final MusicManager musicManager = this.getMusicManager(event.getGuild());
 
         musicManager.trackScheduler.pause(false);
         //textChannel.sendMessage("Play Resuming").queue();
     }
 
-    public void skip(TextChannel textChannel) {
-        final MusicManager musicManager = this.getMusicManager(textChannel.getGuild());
+    public void skip(SlashCommandInteractionEvent event) {
+        final MusicManager musicManager = this.getMusicManager(event.getGuild());
 
         musicManager.trackScheduler.nextTrack();
+    }
+
+    public void nowPlaying(SlashCommandInteractionEvent event){
+        final MusicManager musicManager = this.getMusicManager(event.getGuild());
+    }
+
+    public void displayNowPlaying(SlashCommandInteractionEvent event){
+        final MusicManager musicManager = this.getMusicManager(event.getGuild());
+
+        event.reply("Now Playing: " + musicManager.trackScheduler.getCurrentTrack().getInfo().title).setEphemeral(true).queue();
+    }
+
+    public void displayQueue(SlashCommandInteractionEvent event){
+        final MusicManager musicManager = this.getMusicManager(event.getGuild());
+
+        if (musicManager.trackScheduler.getCurrentTrack() != null) {
+            String queueString = ("Now Playing: " + musicManager.trackScheduler.getCurrentTrack().getInfo().title);
+            int position = 1;
+            for (AudioTrack track : musicManager.trackScheduler.getQueue()) {
+                queueString += ("\n" + position + ": " + track.getInfo().title.toString());
+                position++;
+            }
+
+            event.reply(queueString).setEphemeral(true).queue();
+        }
+        else {
+            event.reply("Queue is empty").setEphemeral(true).queue();
+        }
+    }
+
+    public void emptyQueue(SlashCommandInteractionEvent event) {
+        final MusicManager musicManager = this.getMusicManager(event.getGuild());
+
+        musicManager.trackScheduler.emptyQueue();
+    }
+
+    public void removeTrack(int position, SlashCommandInteractionEvent event){
+        final MusicManager musicManager = this.getMusicManager(event.getGuild());
+
+        musicManager.trackScheduler.removeTrack(position);
+
+        event.reply("Track Removed").setEphemeral(true).queue();
+    }
+
+    public void shuffleQueue(SlashCommandInteractionEvent event) {
+        final MusicManager musicManager = this.getMusicManager(event.getGuild());
+
+        musicManager.trackScheduler.shuffleQueue();
     }
 
     public static PlayerManager getINSTANCE(){

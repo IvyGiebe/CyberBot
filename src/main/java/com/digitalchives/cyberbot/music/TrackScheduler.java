@@ -6,6 +6,8 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -18,6 +20,47 @@ public class TrackScheduler extends AudioEventAdapter {
     public TrackScheduler(AudioPlayer audioPlayer){
         this.audioPlayer = audioPlayer;
         this.queue = new LinkedBlockingQueue<>();
+    }
+
+    public BlockingQueue<AudioTrack> getQueue(){
+        return queue;
+    }
+
+    public void emptyQueue(){
+        queue.clear();
+    }
+
+    public void removeTrack(int position) {
+        int currentPosition = 1;
+        BlockingQueue<AudioTrack> replacementQueue = new LinkedBlockingQueue<>();
+        for (AudioTrack track : queue) {
+            if(currentPosition != position)
+                replacementQueue.offer(track);
+            currentPosition++;
+        }
+        queue.clear();
+        for (AudioTrack track : replacementQueue){
+            queue.offer(track);
+        }
+    }
+
+    public void shuffleQueue() {
+        ArrayList<AudioTrack> queueArray = new ArrayList<>();
+
+        for (AudioTrack track : queue) {
+            queueArray.add(track);
+        }
+        Collections.shuffle(queueArray);
+        queue.clear();
+        for (AudioTrack track : queueArray){
+            queue.offer(track);
+        }
+    }
+
+
+
+    public AudioTrack getCurrentTrack(){
+        return(audioPlayer.getPlayingTrack());
     }
 
     public void queue(AudioTrack track){

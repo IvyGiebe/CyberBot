@@ -148,7 +148,7 @@ public class CommandManager extends ListenerAdapter {
             song = isURL(song) ? song : "ytsearch:" + song;
 
 
-            PlayerManager.getINSTANCE().loadAndPlay(event.getChannel().asTextChannel(), song, event);
+            PlayerManager.getINSTANCE().loadAndPlay(song, event);
 //            event.reply("Searching for song").setEphemeral(true).queue();
         }
 
@@ -159,11 +159,11 @@ public class CommandManager extends ListenerAdapter {
             }
 
             if (command.equals("pause")) {
-                PlayerManager.getINSTANCE().pause(event.getChannel().asTextChannel());
+                PlayerManager.getINSTANCE().pause(event);
                 event.reply("Pausing music").setEphemeral(true).queue();
             }
             if (command.equals("unpause")) {
-                PlayerManager.getINSTANCE().unpause(event.getChannel().asTextChannel());
+                PlayerManager.getINSTANCE().unpause(event);
                 event.reply("Resuming music").setEphemeral(true).queue();
             }
         }
@@ -173,19 +173,47 @@ public class CommandManager extends ListenerAdapter {
                 event.reply("You must be in a voice channel").setEphemeral(true).queue();
             }
 
-            PlayerManager.getINSTANCE().skip(event.getChannel().asTextChannel());
+            PlayerManager.getINSTANCE().skip(event);
             event.reply("Skipping to the next song in the queue").setEphemeral(true).queue();
         }
 
-        //queue
+        else if (command.equals("queue")) {
+            PlayerManager.getINSTANCE().displayQueue(event);
+        }
 
-        //remove <index>
+        else if (command.equals("now_playing")) {
+            PlayerManager.getINSTANCE().displayNowPlaying(event);
+        }
+
+        //remove index
+        else if(command.equals("remove")) {
+            OptionMapping positionOption = event.getOption("position");
+            int position = positionOption.getAsInt();
+
+            PlayerManager.getINSTANCE().removeTrack(position, event);
+        }
 
         //shuffle?
+        else if(command.equals("shuffle")) {
+            PlayerManager.getINSTANCE().shuffleQueue(event);
+
+            event.reply("The queue is shuffled").setEphemeral(true).queue();
+        }
 
         //dc
+        else if(command.equals("disconnect") || command.equals("dc")) {
+            final AudioManager audioManager = event.getGuild().getAudioManager();
+            PlayerManager.getINSTANCE().emptyQueue(event);
+            PlayerManager.getINSTANCE().skip(event);
+            audioManager.closeAudioConnection();
+            event.reply("Bye").setEphemeral(true).queue();
+        }
 
         //clear
+        else if(command.equals("clear_queue")) {
+            PlayerManager.getINSTANCE().emptyQueue(event);
+            event.reply("Queue Emptied").setEphemeral(true).queue();
+        }
 
         //playlist commands for specific scenarios
 
@@ -217,11 +245,19 @@ public class CommandManager extends ListenerAdapter {
         //music????
         OptionData song = new OptionData(OptionType.STRING, "song", "Either use a link or I'll use youtube search", true);
         commandData.add(Commands.slash("play", "Plays music").addOptions(song));
-
         commandData.add(Commands.slash("pause", "Pauses the music"));
         commandData.add(Commands.slash("unpause", "resumes playing the music"));
-
         commandData.add(Commands.slash("skip", "Goes to next song in queue"));
+        commandData.add(Commands.slash("disconnect", "Stop playing music and disconnect from voice channel"));
+        commandData.add(Commands.slash("dc", "Stop playing music and disconnect from voice channel"));
+
+        OptionData position = new OptionData(OptionType.INTEGER, "position", "Position of song you want to remove", true);
+        commandData.add(Commands.slash("remove", "Removes track from given position").addOptions(position));
+        commandData.add(Commands.slash("shuffle", "Re-orders the current queue randomly"));
+        commandData.add(Commands.slash("clear_queue", "Clears current queue"));
+
+        commandData.add(Commands.slash("queue", "Displays the current queue"));
+        commandData.add(Commands.slash("now_playing", "Displays the current track"));
 
         return commandData;
     }
