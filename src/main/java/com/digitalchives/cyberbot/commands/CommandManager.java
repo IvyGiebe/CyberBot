@@ -1,25 +1,31 @@
 package com.digitalchives.cyberbot.commands;
 
-import com.digitalchives.cyberbot.enums.CheckResult;
+import com.digitalchives.cyberbot.music.AudioPlayerSendHandler;
+import com.digitalchives.cyberbot.music.PlayerManager;
+import com.digitalchives.cyberbot.music.TrackScheduler;
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.internal.handle.GuildRoleCreateHandler;
-import org.apache.commons.collections4.functors.TruePredicate;
+import net.dv8tion.jda.api.managers.AudioManager;
 
-import javax.swing.text.html.Option;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -127,8 +133,63 @@ public class CommandManager extends ListenerAdapter {
 
         }
 
-    }
+        else if (command.equals("play")){
+            OptionMapping songOption = event.getOption("song");
+            String song = songOption.getAsString();
 
+            if(!event.getMember().getVoiceState().inAudioChannel()){
+                event.reply("You must be in a voice channel").setEphemeral(true).queue();
+            }
+
+            final AudioManager audioManager = event.getGuild().getAudioManager();
+            final VoiceChannel voiceChannel = (VoiceChannel) event.getMember().getVoiceState().getChannel().asVoiceChannel();
+            audioManager.openAudioConnection(voiceChannel);
+
+            song = isURL(song) ? song : "ytsearch:" + song;
+
+
+            PlayerManager.getINSTANCE().loadAndPlay(event.getChannel().asTextChannel(), song, event);
+//            event.reply("Searching for song").setEphemeral(true).queue();
+        }
+
+        else if (command.equals("pause") || command.equals("unpause")){
+
+            if(!event.getMember().getVoiceState().inAudioChannel()){
+                event.reply("You must be in a voice channel").setEphemeral(true).queue();
+            }
+
+            if (command.equals("pause")) {
+                PlayerManager.getINSTANCE().pause(event.getChannel().asTextChannel());
+                event.reply("Pausing music").setEphemeral(true).queue();
+            }
+            if (command.equals("unpause")) {
+                PlayerManager.getINSTANCE().unpause(event.getChannel().asTextChannel());
+                event.reply("Resuming music").setEphemeral(true).queue();
+            }
+        }
+
+        else if (command.equals("skip")) {
+            if(!event.getMember().getVoiceState().inAudioChannel()){
+                event.reply("You must be in a voice channel").setEphemeral(true).queue();
+            }
+
+            PlayerManager.getINSTANCE().skip(event.getChannel().asTextChannel());
+            event.reply("Skipping to the next song in the queue").setEphemeral(true).queue();
+        }
+
+        //queue
+
+        //remove <index>
+
+        //shuffle?
+
+        //dc
+
+        //clear
+
+        //playlist commands for specific scenarios
+
+    }
 
 
     public List<CommandData> commandList(){
@@ -152,6 +213,16 @@ public class CommandManager extends ListenerAdapter {
         //names command
         commandData.add(Commands.slash("names", "Gives a reference list of player and character names"));
 
+
+        //music????
+        OptionData song = new OptionData(OptionType.STRING, "song", "Either use a link or I'll use youtube search", true);
+        commandData.add(Commands.slash("play", "Plays music").addOptions(song));
+
+        commandData.add(Commands.slash("pause", "Pauses the music"));
+        commandData.add(Commands.slash("unpause", "resumes playing the music"));
+
+        commandData.add(Commands.slash("skip", "Goes to next song in queue"));
+
         return commandData;
     }
 
@@ -163,5 +234,17 @@ public class CommandManager extends ListenerAdapter {
     @Override
     public void onGuildJoin(GuildJoinEvent event) {
         event.getGuild().updateCommands().addCommands(commandList()).queue();
+    }
+
+    public boolean isURL(String link){
+        try {
+            new URL(link).toURI();
+            return true;
+        }
+        catch(URISyntaxException e){
+            return false;
+        } catch (MalformedURLException e) {
+            return false;
+        }
     }
 }

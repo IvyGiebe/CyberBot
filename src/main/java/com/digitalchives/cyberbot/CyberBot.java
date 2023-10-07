@@ -2,6 +2,10 @@ package com.digitalchives.cyberbot;
 
 import com.digitalchives.cyberbot.commands.CommandManager;
 import com.digitalchives.cyberbot.listeners.EventListener;
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.source.AudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import io.github.cdimascio.dotenv.Dotenv;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
@@ -16,9 +20,10 @@ import javax.security.auth.login.LoginException;
 
 //invite link https://discord.com/api/oauth2/authorize?client_id=1159518907602833450&permissions=8&scope=bot%20applications.commands
 public class CyberBot {
-//hhhhhhg
+
     private final ShardManager shardManager;
     private final Dotenv config;
+
 
     public CyberBot() throws LoginException {
         config = Dotenv.configure().load();

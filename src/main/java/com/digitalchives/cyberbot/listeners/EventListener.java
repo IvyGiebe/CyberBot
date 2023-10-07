@@ -6,6 +6,8 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class EventListener extends ListenerAdapter {
 
+
+
     @Override
     public void onGuildMemberJoin(GuildMemberJoinEvent event) {
         String user = event.getUser().getAsMention();
