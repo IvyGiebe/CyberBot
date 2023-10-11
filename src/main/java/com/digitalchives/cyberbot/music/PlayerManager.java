@@ -11,10 +11,8 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javax.sound.midi.Track;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 
 public class PlayerManager {
@@ -47,7 +45,6 @@ public class PlayerManager {
             public void trackLoaded(AudioTrack track) {
                 musicManager.trackScheduler.queue(track);
                 event.reply("Adding to queue **'" + track.getInfo().title + "'**").setEphemeral(true).queue();
-//                textChannel.sendMessage("Adding to queue **'" + track.getInfo().title + "'** by **'" + track.getInfo().author + "'**").queue();
             }
 
             @Override
@@ -56,69 +53,40 @@ public class PlayerManager {
                 if(!tracks.isEmpty()){
                     musicManager.trackScheduler.queue(tracks.get(0));
                     event.reply("Adding to queue **'" + tracks.get(0).getInfo().title + "'**").setEphemeral(true).queue();
-//                    textChannel.sendMessage("Adding to queue **'" + tracks.get(0).getInfo().title + "'** by **'" + tracks.get(0).getInfo().author + "'**").queue();
                 }
             }
-
+            //these are needed for the AudioLoadResultHandler
             @Override
-            public void noMatches() {
-
-            }
-
+            public void noMatches() {}
             @Override
-            public void loadFailed(FriendlyException exception) {
-
-            }
+            public void loadFailed(FriendlyException exception) {}
         });
 
     }
 
-    public void pause(SlashCommandInteractionEvent event){
+    public void pause(boolean pause, SlashCommandInteractionEvent event){
         final MusicManager musicManager = this.getMusicManager(event.getGuild());
-
-        musicManager.trackScheduler.pause(true);
-        //textChannel.sendMessage("Music is paused. Use /unpause to resume playing.").queue();
-    }
-
-    public void unpause(SlashCommandInteractionEvent event){
-        final MusicManager musicManager = this.getMusicManager(event.getGuild());
-
-        musicManager.trackScheduler.pause(false);
-        //textChannel.sendMessage("Play Resuming").queue();
+        musicManager.trackScheduler.pause(pause);
     }
 
     public void skip(SlashCommandInteractionEvent event) {
         final MusicManager musicManager = this.getMusicManager(event.getGuild());
-
         musicManager.trackScheduler.nextTrack();
     }
 
-    public void nowPlaying(SlashCommandInteractionEvent event){
+    public AudioTrack nowPlaying(SlashCommandInteractionEvent event){
         final MusicManager musicManager = this.getMusicManager(event.getGuild());
+        return musicManager.trackScheduler.getCurrentTrack();
     }
 
-    public void displayNowPlaying(SlashCommandInteractionEvent event){
+    public ArrayList<AudioTrack> queue(SlashCommandInteractionEvent event){
         final MusicManager musicManager = this.getMusicManager(event.getGuild());
 
-        event.reply("Now Playing: " + musicManager.trackScheduler.getCurrentTrack().getInfo().title).setEphemeral(true).queue();
-    }
+        ArrayList<AudioTrack> queueList = new ArrayList<>();
 
-    public void displayQueue(SlashCommandInteractionEvent event){
-        final MusicManager musicManager = this.getMusicManager(event.getGuild());
+        queueList.addAll(musicManager.trackScheduler.getQueue());
 
-        if (musicManager.trackScheduler.getCurrentTrack() != null) {
-            String queueString = ("Now Playing: " + musicManager.trackScheduler.getCurrentTrack().getInfo().title);
-            int position = 1;
-            for (AudioTrack track : musicManager.trackScheduler.getQueue()) {
-                queueString += ("\n" + position + ": " + track.getInfo().title.toString());
-                position++;
-            }
-
-            event.reply(queueString).setEphemeral(true).queue();
-        }
-        else {
-            event.reply("Queue is empty").setEphemeral(true).queue();
-        }
+        return queueList;
     }
 
     public void emptyQueue(SlashCommandInteractionEvent event) {
@@ -131,8 +99,6 @@ public class PlayerManager {
         final MusicManager musicManager = this.getMusicManager(event.getGuild());
 
         musicManager.trackScheduler.removeTrack(position);
-
-        event.reply("Track Removed").setEphemeral(true).queue();
     }
 
     public void shuffleQueue(SlashCommandInteractionEvent event) {

@@ -2,19 +2,12 @@ package com.digitalchives.cyberbot;
 
 import com.digitalchives.cyberbot.commands.CommandManager;
 import com.digitalchives.cyberbot.listeners.EventListener;
-import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
-import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
-import com.sedmelluq.discord.lavaplayer.source.AudioSourceManager;
-import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import io.github.cdimascio.dotenv.Dotenv;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
-import net.dv8tion.jda.api.utils.ChunkingFilter;
-import net.dv8tion.jda.api.utils.MemberCachePolicy;
-import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
 import javax.security.auth.login.LoginException;
 
@@ -35,14 +28,11 @@ public class CyberBot {
         builder.setActivity(Activity.customStatus("Transcending Physicality"));
         builder.enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGES);
 
-        //builder.setMemberCachePolicy(MemberCachePolicy.ALL);
-        //builder.setChunkingFilter(ChunkingFilter.ALL);
-        //builder.enableCache(CacheFlag.ROLE_TAGS);
-
         shardManager = builder.build();
         shardManager.addEventListener(new EventListener(), new CommandManager());
     }
 
+    /*
     public Dotenv getConfig(){
         return config;
     }
@@ -50,7 +40,9 @@ public class CyberBot {
     public ShardManager getShardManager() {
         return shardManager;
     }
+    */
 
+    //Tests to make sure the bot token is valid.
     public static void main(String[] args){
         try {
             CyberBot cyberBot = new CyberBot();
