@@ -1,6 +1,7 @@
 package com.digitalchives.cyberbot.listeners;
 
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class EventListener extends ListenerAdapter {
@@ -15,4 +16,14 @@ public class EventListener extends ListenerAdapter {
         event.getGuild().getTextChannelsByName("Welcome", true).get(0).sendMessage(welcomeMessage).queue();
     }
 
+    @Override
+    public void onMessageReceived(MessageReceivedEvent event) {
+        String message = event.getMessage().getContentRaw().toLowerCase();
+        if (message.contains("hi vira") || message.contains("hello vira") || message.contains("hey vira"))
+            event.getMessage().reply("Hey " + event.getMember().getEffectiveName()).queue();
+        if (message.contains("thanks vira") || message.contains("thank you vira"))
+            event.getMessage().reply("You're welcome " + event.getMember().getEffectiveName() + " :)").queue();
+
+        super.onMessageReceived(event);
+    }
 }

@@ -26,7 +26,7 @@ public class CyberBot {
 
         builder.setStatus(OnlineStatus.ONLINE);
         builder.setActivity(Activity.customStatus("Transcending Physicality"));
-        builder.enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGES);
+        builder.enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT);
 
         shardManager = builder.build();
         shardManager.addEventListener(new EventListener(), new CommandManager());
