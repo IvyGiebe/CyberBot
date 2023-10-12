@@ -8,6 +8,8 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
+import net.dv8tion.jda.api.utils.ChunkingFilter;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 
 import javax.security.auth.login.LoginException;
 
@@ -27,6 +29,8 @@ public class CyberBot {
         builder.setStatus(OnlineStatus.ONLINE);
         builder.setActivity(Activity.customStatus("Transcending Physicality"));
         builder.enableIntents(GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT);
+        builder.setChunkingFilter(ChunkingFilter.ALL);
+        builder.setMemberCachePolicy(MemberCachePolicy.ALL);
 
         shardManager = builder.build();
         shardManager.addEventListener(new EventListener(), new CommandManager());
