@@ -37,22 +37,44 @@ public class PlayerManager {
         });
     }
 
-    public void loadAndPlay(String trackURL, SlashCommandInteractionEvent event){
+    public void loadAndPlay(String trackURL, boolean isSearch, SlashCommandInteractionEvent event){
+        loadAndPlay(trackURL, isSearch, false, false, event);
+
+    }
+
+    public void loadAndPlay(String trackURL, boolean isSearch, boolean shufflePlaylist, boolean silent, SlashCommandInteractionEvent event){
         final MusicManager musicManager = this.getMusicManager(event.getGuild());
 
         this.audioPlayerManager.loadItemOrdered(musicManager, trackURL, new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
                 musicManager.trackScheduler.queue(track);
-                event.reply("Adding to queue **'" + track.getInfo().title + "'**").setEphemeral(true).queue();
+                if(!silent)
+                    event.reply("Adding to queue **'" + track.getInfo().title + "'**").setEphemeral(true).queue();
             }
 
             @Override
             public void playlistLoaded(AudioPlaylist playlist) {
                 final List<AudioTrack> tracks = playlist.getTracks();
+                final String playlistName = playlist.getName();
                 if(!tracks.isEmpty()){
-                    musicManager.trackScheduler.queue(tracks.get(0));
-                    event.reply("Adding to queue **'" + tracks.get(0).getInfo().title + "'**").setEphemeral(true).queue();
+                    if(shufflePlaylist){
+                        Collections.shuffle(tracks);
+                    }
+                    if(!isSearch) {
+                        for (AudioTrack track : tracks) {
+                            musicManager.trackScheduler.queue(track);
+                        }
+                        if(!silent)
+                            event.reply("Added to queue **'" + playlistName + "'** playlist").setEphemeral(true).queue();
+                            //event.reply("Added to queue **'" + playlistName + "'** playlist").setEphemeral(false).queue();
+                    }
+                    else {
+                        musicManager.trackScheduler.queue(tracks.get(0));
+                        if(!silent)
+                            event.reply("Adding to queue **'" + tracks.get(0).getInfo().title + "'**").setEphemeral(true).queue();
+                            //event.reply("Added to queue **'" + playlistName + "'** playlist").setEphemeral(false).queue();
+                    }
                 }
             }
             //these are needed for the AudioLoadResultHandler
@@ -63,6 +85,51 @@ public class PlayerManager {
         });
 
     }
+
+    public boolean finishedLoadAndPlay(String trackURL, boolean isSearch, SlashCommandInteractionEvent event, Boolean silent){
+        final MusicManager musicManager = this.getMusicManager(event.getGuild());
+
+        this.audioPlayerManager.loadItemOrdered(musicManager, trackURL, new AudioLoadResultHandler() {
+            @Override
+            public void trackLoaded(AudioTrack track) {
+                musicManager.trackScheduler.queue(track);
+                if(!silent)
+                    event.reply("Adding to queue **'" + track.getInfo().title + "'**").setEphemeral(true).queue();
+            }
+
+            @Override
+            public void playlistLoaded(AudioPlaylist playlist) {
+                final List<AudioTrack> tracks = playlist.getTracks();
+                final String playlistName = playlist.getName();
+                if(!tracks.isEmpty()){
+                    if(!isSearch) {
+                        for (AudioTrack track : tracks) {
+                            musicManager.trackScheduler.queue(track);
+                        }
+                        if(!silent)
+                            event.reply("Added to queue **'" + playlistName + "'** playlist").setEphemeral(true).queue();
+                        //event.reply("Added to queue **'" + playlistName + "'** playlist").setEphemeral(false).queue();
+                    }
+                    else {
+                        musicManager.trackScheduler.queue(tracks.get(0));
+                        if(!silent)
+                            event.reply("Adding to queue **'" + tracks.get(0).getInfo().title + "'**").setEphemeral(true).queue();
+                        //event.reply("Added to queue **'" + playlistName + "'** playlist").setEphemeral(false).queue();
+                    }
+                }
+            }
+            //these are needed for the AudioLoadResultHandler
+            @Override
+            public void noMatches() {}
+            @Override
+            public void loadFailed(FriendlyException exception) {}
+        });
+
+        return true;
+
+    }
+
+
 
     public void pause(boolean pause, SlashCommandInteractionEvent event){
         final MusicManager musicManager = this.getMusicManager(event.getGuild());

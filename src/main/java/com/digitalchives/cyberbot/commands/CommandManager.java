@@ -1,5 +1,6 @@
 package com.digitalchives.cyberbot.commands;
 
+import com.digitalchives.cyberbot.enums.Playlists;
 import com.digitalchives.cyberbot.music.AudioPlayerSendHandler;
 import com.digitalchives.cyberbot.music.PlayerManager;
 import com.digitalchives.cyberbot.music.TrackScheduler;
@@ -32,6 +33,8 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.digitalchives.cyberbot.enums.Playlists.*;
+
 public class CommandManager extends ListenerAdapter {
 
     GameplayCommands gameplayCommands = new GameplayCommands();
@@ -41,6 +44,10 @@ public class CommandManager extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
         String command = event.getName();
+
+        String playlist;
+        Playlists playlistSelection;
+        OptionMapping playlistOption;
 
         switch(command) {
 
@@ -69,10 +76,6 @@ public class CommandManager extends ListenerAdapter {
 
                 gameplayCommands.roll(diceValue, diceQuantity, event);
                 break;
-
-            //level
-            //sheets
-            //mysheet
 
             /*
             Music Commands
@@ -114,6 +117,43 @@ public class CommandManager extends ListenerAdapter {
 
             //playlist commands for specific scenarios
 
+            case("playlist"):
+                playlistOption = event.getOption("playlist");
+                playlist = playlistOption.getAsString();
+                playlistSelection = switch (playlist) {
+                    case "Pregame" ->
+                            PREGAME;
+                    case "Russian Hardstyle" ->
+                            RUSSIAN_HARDSTYLE;
+                    case "Nightcore" ->
+                            NIGHTCORE;
+                    case "League" ->
+                            LEAGUE;
+                    default ->
+                            EMPTY;
+
+                };
+                musicCommands.playPlaylist(playlistSelection, true, event);
+                break;
+
+            case("queue_playlist"):
+                playlistOption = event.getOption("playlist");
+                playlist = playlistOption.getAsString();
+                playlistSelection = switch (playlist) {
+                    case "Pregame" ->
+                            PREGAME;
+                    case "Russian Hardstyle" ->
+                            RUSSIAN_HARDSTYLE;
+                    case "Nightcore" ->
+                            NIGHTCORE;
+                    case "League" ->
+                            LEAGUE;
+                    default ->
+                            EMPTY;
+                };
+                musicCommands.playPlaylist(playlistSelection, false, event);
+                break;
+
             /*
             Server Commands
              */
@@ -123,6 +163,7 @@ public class CommandManager extends ListenerAdapter {
 
                 serverCommands.myName(playerName, event);
                 break;
+
             case("names"):
                 serverCommands.names(event);
                 break;
@@ -148,6 +189,12 @@ public class CommandManager extends ListenerAdapter {
         //Music Commands
         OptionData song = new OptionData(OptionType.STRING, "song", "Either use a link or I'll use youtube search", true);
         OptionData position = new OptionData(OptionType.INTEGER, "position", "Position of song you want to remove", true);
+        OptionData playlist = new OptionData(OptionType.STRING, "playlist", "Pick a playlist from the available options", true);
+        playlist.addChoice("Pregame", "Pregame");
+        playlist.addChoice("Russian Hardstyle", "Russian Hardstyle");
+        playlist.addChoice("Nightcore", "Nightcore");
+        playlist.addChoice("League", "League");
+
 
         commandData.add(Commands.slash("play", "Plays music").addOptions(song));
         commandData.add(Commands.slash("pause", "Pauses the music"));
@@ -162,14 +209,16 @@ public class CommandManager extends ListenerAdapter {
         commandData.add(Commands.slash("remove", "Removes track from given position").addOptions(position));
         commandData.add(Commands.slash("clear_queue", "Clears current queue"));
 
+        commandData.add(Commands.slash("playlist", "Plays selected playlist").addOptions(playlist));
+        commandData.add(Commands.slash("queue_playlist", "Adds selected playlist to queue").addOptions(playlist));
+
 
         //Server Commands
-        OptionData player_name = new OptionData(OptionType.STRING, "my_name", "Please write your real name", true);
+        //OptionData player_name = new OptionData(OptionType.STRING, "my_name", "Please write your real name", true);
         OptionData color = new OptionData(OptionType.STRING, "color", "Please pick a color for your name", true);
 
-        commandData.add(Commands.slash("my_name", "Please input your real name").addOptions(player_name));
+        //commandData.add(Commands.slash("my_name", "Please input your real name").addOptions(player_name));
         commandData.add(Commands.slash("names", "Gives a reference list of player and character names"));
-
 
         return commandData;
     }
