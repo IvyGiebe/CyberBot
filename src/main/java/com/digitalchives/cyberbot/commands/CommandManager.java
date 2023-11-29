@@ -94,6 +94,9 @@ public class CommandManager extends ListenerAdapter {
             case("skip"):
                 musicCommands.skip(event);
                 break;
+            case("loop"):
+                musicCommands.loop(event);
+                break;
             case("disconnect"), ("dc"):
                 musicCommands.disconnect(event);
                 break;
@@ -200,6 +203,7 @@ public class CommandManager extends ListenerAdapter {
         commandData.add(Commands.slash("pause", "Pauses the music"));
         commandData.add(Commands.slash("unpause", "resumes playing the music"));
         commandData.add(Commands.slash("skip", "Goes to next song in queue"));
+        commandData.add(Commands.slash("loop", "Loops the current queue and any songs you add after"));
         commandData.add(Commands.slash("disconnect", "Stop playing music and disconnect from voice channel"));
         commandData.add(Commands.slash("dc", "Stop playing music and disconnect from voice channel"));
 

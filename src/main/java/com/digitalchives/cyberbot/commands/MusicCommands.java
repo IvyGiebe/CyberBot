@@ -3,6 +3,7 @@ package com.digitalchives.cyberbot.commands;
 import com.digitalchives.cyberbot.UtilMethods;
 import com.digitalchives.cyberbot.enums.Playlists;
 import com.digitalchives.cyberbot.music.PlayerManager;
+import com.digitalchives.cyberbot.music.TrackScheduler;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -57,6 +58,10 @@ public class MusicCommands {
 
         PlayerManager.getINSTANCE().skip(event);
         event.reply("Skipping to the next song in the queue").setEphemeral(true).queue();
+    }
+
+    public void loop(SlashCommandInteractionEvent event){
+        PlayerManager.getINSTANCE().loop(event);
     }
 
     public void disconnect(SlashCommandInteractionEvent event) {
@@ -127,7 +132,6 @@ public class MusicCommands {
 
         boolean randomOrder = playlist != Playlists.PREGAME;
 
-        final String silenceURL = "https://www.youtube.com/watch?v=wu2djWZzmz0";
         String playlistURL = switch (playlist) {
             case Playlists.PREGAME ->
                     "https://youtube.com/playlist?list=PLK2pjaIEGMgujgT5mPQS3FIgJP2nBQZJY&si=d3p7CfbJ2V3z1Eno";
@@ -138,7 +142,7 @@ public class MusicCommands {
             case Playlists.LEAGUE ->
                     "https://youtube.com/playlist?list=PLK2pjaIEGMgu08CLmMTEthaDupQod6NqA&si=FGq4MVTHbhVBGh5k";
             case EMPTY ->
-                    silenceURL;
+                    "";
         };
 
         if (clearPrevious){

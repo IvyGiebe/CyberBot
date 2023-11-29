@@ -141,6 +141,15 @@ public class PlayerManager {
         musicManager.trackScheduler.nextTrack();
     }
 
+    public void loop(SlashCommandInteractionEvent event){
+        final MusicManager musicManager = this.getMusicManager(event.getGuild());
+        musicManager.trackScheduler.setLooping(!musicManager.trackScheduler.getLooping());
+        if(musicManager.trackScheduler.getLooping())
+            event.reply("Looping the queue").setEphemeral(true).queue();
+        else
+            event.reply("Stopped looping the queue").setEphemeral(true).queue();
+    }
+
     public AudioTrack nowPlaying(SlashCommandInteractionEvent event){
         final MusicManager musicManager = this.getMusicManager(event.getGuild());
         return musicManager.trackScheduler.getCurrentTrack();

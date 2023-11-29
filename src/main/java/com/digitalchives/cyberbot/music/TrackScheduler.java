@@ -15,6 +15,7 @@ public class TrackScheduler extends AudioEventAdapter {
 
     public final AudioPlayer audioPlayer;
     public final BlockingQueue<AudioTrack> queue;
+    public boolean looping = false;
 
     public TrackScheduler(AudioPlayer audioPlayer){
         this.audioPlayer = audioPlayer;
@@ -76,8 +77,17 @@ public class TrackScheduler extends AudioEventAdapter {
 
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
-        if (endReason.mayStartNext) {
+        if(looping)
+            this.queue.offer(track);
+        if (endReason.mayStartNext)
             nextTrack();
-        }
+    }
+
+    public boolean getLooping(){
+        return looping;
+    }
+
+    public void setLooping(boolean looping){
+        this.looping = looping;
     }
 }
